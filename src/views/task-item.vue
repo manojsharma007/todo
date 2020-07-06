@@ -1,0 +1,38 @@
+<template>
+
+    <li class="tasks__item">
+      <button :class="className"
+          @click.self="$emit('complete')"
+      >
+        {{ task.title }}
+      </button>
+      <button class="tasks__item__remove button alert pull-right"
+              @click="$emit('remove')"
+      >
+        Remove
+      </button>
+    </li>
+ 
+</template>
+<script>
+//import eventBus from '../main.js';
+    export default {
+        props: ['task'],
+         computed: {
+            className() {
+            let classes = ['tasks__item__toggle'];
+            if (this.task.completed) {
+                classes.push('tasks__item__toggle--completed');
+            }
+            return classes.join(' ');
+            }
+        },
+          created() {
+            //     eventBus.$on("update-tasks", (task) => {
+            //         alert()
+            //    this.task =task;
+            //     });
+               
+            }
+    }
+</script>
