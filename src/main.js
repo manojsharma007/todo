@@ -3,7 +3,6 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import Toastr from 'vue-toastr'
-//import '@/assets/css/style.css'
 export const EventBus = new Vue();
 
 

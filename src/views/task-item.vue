@@ -27,12 +27,5 @@
             return classes.join(' ');
             }
         },
-          created() {
-            //     eventBus.$on("update-tasks", (task) => {
-            //         alert()
-            //    this.task =task;
-            //     });
-               
-            }
     }
 </script>
