@@ -3,12 +3,13 @@
     <li class="tasks__item">
       <button :class="className"
           @click.self="$emit('complete')"
-      >
+     >
         {{ task.title }}
       </button>
+      
       <button class="tasks__item__remove button alert pull-right"
               @click="$emit('remove')"
-      >
+   >
         Remove
       </button>
     </li>
@@ -29,3 +30,15 @@
         },
     }
 </script>
+
+<style>
+.tasks__item__toggle{
+ width: 80%
+}
+.tasks__item__remove{
+    width: 20%
+}
+.tasks__item .button {
+    padding: 0;
+}
+</style>

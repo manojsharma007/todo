@@ -23,7 +23,6 @@
   
         </span>
       </div>
-
       <div class="tasks__clear button-group pull-right">
         <button class="button warning small"
                 @click="clearCompleted"
@@ -39,7 +38,7 @@
       
       <transition-group name="fade" tag="ul" class="tasks__list no-bullet">
           <taskitem v-for="(task, index) in updateTasks"
-                     @remove="removeTask(index)"
+                     @remove="removeTask(task)"
                      @complete="completeTask(task)"
                      :task="task"
                      :key="index"
@@ -50,6 +49,7 @@
 
 <script>
 import taskitem from './task-item.vue';
+import axios from 'axios'
 export default {
   props: ['tasks'],
   components:{
@@ -58,7 +58,8 @@ export default {
    data() {
     return {
       newTask: '',
-      updateTasks:this.tasks
+      updateTasks:this.tasks,
+      apiurl:"VUE_APP_API_URLhttp://www.todo.manojksharma.in/database.php"
     };
   },
   computed: {
@@ -66,23 +67,63 @@ export default {
       return this.updateTasks.filter(this.inProgress).length;
     }
   },
+    mounted() {
+     this.getTask();
+  
+  },
   methods: {
     addTask() {
       if (this.newTask) {
         this.updateTasks.push({
-          id: Math.floor(Math.random()*(50-10+1)+10),
           title: this.newTask,
           completed: false
         });
+        // Call add api here
+         axios.get("http://www.todo.manojksharma.in/database.php?type=add&title="+this.newTask, {
+         headers: {
+        }
+      }).then(res => {        
+     
+        res.data.map(function(value) {
+          if(value.completed=="1"){
+            value.completed=false;
+          }
+        });
+        
+      this.updateTasks=res.data;
+      }).catch(err => {
+        console.log(err);
+      });
         this.newTask = "";
       }
     },
     
     completeTask(task) {
-      task.completed = !task.completed;
+
+     
+     let completed =task.completed=="0"?"1":"0";      
+      axios
+        .get("http://www.todo.manojksharma.in/database.php?type=update&completed="+ completed+"&id=" + task.id, {
+          headers: {}
+        })
+        .then(() => {
+          this.getTask();
+        })
+        .catch(err => {
+          console.log(err);
+        });
     },
-    removeTask(index) {
-      this.updateTasks.splice(index, 1);
+    removeTask(task) {
+           // Call delete api here
+         axios.get("http://www.todo.manojksharma.in/database.php?type=delete&id="+task.id, {
+         headers: {
+        }
+      }).then( ()=> {        
+     
+        this.getTask();
+      }).catch(err => {
+        console.log(err);
+      });
     },
     clearCompleted() {
       this.updateTasks = this.updateTasks.filter(this.inProgress);
@@ -96,7 +137,31 @@ export default {
     },
     isCompleted(task) {
       return task.completed;
+    },
+   async getTask() {
+      await axios.get("http://www.todo.manojksharma.in/database.php", {
+         headers: {
+        }
+      }).then(res => {        
+     
+        res.data.map(function(value) {
+          if(value.completed=="1"){
+            value.completed=true;
+          }
+          else
+          {
+            value.completed=false;
+          }
+        });
+        
+        this.updateTasks=res.data;
+      }).catch(err => {
+        console.log(err);
+      });
+  
     }
+
+
   }
 };
 </script>
