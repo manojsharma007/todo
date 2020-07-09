@@ -36,30 +36,28 @@
         </button>
       </div>
       
-      <transition-group name="fade" tag="ul" class="tasks__list no-bullet">
-          <taskitem v-for="(task, index) in updateTasks"
-                     @remove="removeTask(task)"
-                     @complete="completeTask(task)"
-                     :task="task"
-                     :key="index"
+     
+          <taskitem 
+                     @remove="removeTask($event)"
+                     @complete="completeTask($event)"
+                     :task="updateTasks"
           ></taskitem>
-      </transition-group>
+     
     </section>
 </template>
 
 <script>
-import taskitem from './task-item.vue';
-import axios from 'axios'
+import taskitem from "./task-item.vue";
+import axios from "axios";
 export default {
-  props: ['tasks'],
-  components:{
-      taskitem
+  components: {
+    taskitem
   },
-   data() {
+  data() {
     return {
-      newTask: '',
-      updateTasks:this.tasks,
-      apiurl:"VUE_APP_API_URLhttp://www.todo.manojksharma.in/database.php"
+      newTask: "",
+      updateTasks: [],
+      apiURL: "https://todo.manojksharma.in/"
     };
   },
   computed: {
@@ -67,9 +65,8 @@ export default {
       return this.updateTasks.filter(this.inProgress).length;
     }
   },
-    mounted() {
-     this.getTask();
-  
+  mounted() {
+    this.getTask();
   },
   methods: {
     addTask() {
@@ -79,31 +76,51 @@ export default {
           completed: false
         });
         // Call add api here
-         axios.get("http://www.todo.manojksharma.in/database.php?type=add&title="+this.newTask, {
-         headers: {
-        }
-      }).then(res => {        
-     
-        res.data.map(function(value) {
-          if(value.completed=="1"){
-            value.completed=false;
-          }
-        });
-        
-      this.updateTasks=res.data;
-      }).catch(err => {
-        console.log(err);
-      });
+        axios
+          .get(this.apiURL + "database.php?type=add&title=" + this.newTask, {
+            headers: {}
+          })
+          .then(res => {
+            res.data.map(function(value) {
+              if (value.completed == "1") {
+                value.completed = false;
+              }
+            });
+
+            this.updateTasks =Array.entries(res.data); 
+          })
+          .catch(err => {
+            console.log(err);
+          });
         this.newTask = "";
       }
     },
-    
-    completeTask(task) {
 
-     
-     let completed =task.completed=="0"?"1":"0";      
+    completeTask(task) {
+      let completed = task.completed == "0" ? "1" : "0";
       axios
-        .get("http://www.todo.manojksharma.in/database.php?type=update&completed="+ completed+"&id=" + task.id, {
+        .get(
+          this.apiURL +
+            "database.php?type=update&completed=" +
+            completed +
+            "&id=" +
+            task.id,
+          {
+            headers: {}
+          }
+        )
+        .then(() => {
+          
+         this.getTask();
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    removeTask(task) {
+      // Call delete api here
+      axios
+        .get(this.apiURL + "database.php?type=delete&id=" + task.id, {
           headers: {}
         })
         .then(() => {
@@ -113,23 +130,11 @@ export default {
           console.log(err);
         });
     },
-    removeTask(task) {
-           // Call delete api here
-         axios.get("http://www.todo.manojksharma.in/database.php?type=delete&id="+task.id, {
-         headers: {
-        }
-      }).then( ()=> {        
-     
-        this.getTask();
-      }).catch(err => {
-        console.log(err);
-      });
-    },
     clearCompleted() {
       this.updateTasks = this.updateTasks.filter(this.inProgress);
     },
     clearAll() {
-     this.updateTasks=[];
+      this.updateTasks = [];
     },
 
     inProgress(task) {
@@ -138,30 +143,26 @@ export default {
     isCompleted(task) {
       return task.completed;
     },
-   async getTask() {
-      await axios.get("http://www.todo.manojksharma.in/database.php", {
-         headers: {
-        }
-      }).then(res => {        
-     
-        res.data.map(function(value) {
-          if(value.completed=="1"){
-            value.completed=true;
-          }
-          else
-          {
-            value.completed=false;
-          }
+    async getTask() {
+      await axios
+        .get(this.apiURL + "database.php", {
+          headers: {}
+        })
+        .then(res => {
+          res.data.map(function(value) {
+            if (value.completed == "1") {
+              value.completed = true;
+            } else {
+              value.completed = false;
+            }           
+          });
+    
+          this.updateTasks = res.data;
+        })
+        .catch(err => {
+          console.log(err);
         });
-        
-        this.updateTasks=res.data;
-      }).catch(err => {
-        console.log(err);
-      });
-  
     }
-
-
   }
 };
 </script>
