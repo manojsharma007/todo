@@ -71,23 +71,21 @@ export default {
   methods: {
     addTask() {
       if (this.newTask) {
-        this.updateTasks.push({
-          title: this.newTask,
-          completed: false
-        });
         // Call add api here
         axios
           .get(this.apiURL + "database.php?type=add&title=" + this.newTask, {
             headers: {}
           })
           .then(res => {
+           this.getTask();
             res.data.map(function(value) {
               if (value.completed == "1") {
                 value.completed = false;
               }
             });
 
-            this.updateTasks =Array.entries(res.data); 
+            //this.updateTasks =Array.entries(res.data); 
+            
           })
           .catch(err => {
             console.log(err);
